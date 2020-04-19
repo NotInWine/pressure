@@ -91,7 +91,7 @@ public class Main {
 ### 输出示例
 - LogResultInfoMonitor 日志
 ```text
-batchId=4752, name=子列表(包含动态参数), state=SUCCESS, httpLog=HttpLog{url='https://xkx.aiyingli.com/api/video/getVideList?recordId=245&type=video', httpState=200, params=null
+batchId=4752, name=子列表(包含动态参数), state=SUCCESS, httpLog=HttpLog{url='https://xkx.xxx.com/api/video/getVideList?recordId=245&type=video', httpState=200, params=null
 , requestHeaders=null
 , responseHeaders=[Server: nginx, Date: Sun, 19 Apr 2020 04:59:12 GMT, Content-Type: application/json; charset=utf-8, Transfer-Encoding: chunked, Connection: keep-alive, X-Powered-By: PHP/5.5.38, Access-Control-Allow-Origin: *]
 , responseBody='{"code":1,"msg":"success","time":"1587272352","data":[{]}'}

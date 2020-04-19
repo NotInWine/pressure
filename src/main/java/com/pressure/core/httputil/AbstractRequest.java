@@ -1,13 +1,12 @@
 package com.pressure.core.httputil;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.pressure.core.bean.RequestInfo;
 import com.pressure.core.bean.ResultInfo;
-import com.fasterxml.jackson.databind.JsonNode;
 
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Timer;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -45,6 +44,11 @@ public abstract class AbstractRequest implements RequestInterface {
             System.out.println("启动打印线程");
             while (loop) {
                 print(endNotice);
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
         });
         thread.start();
@@ -55,13 +59,8 @@ public abstract class AbstractRequest implements RequestInterface {
      * @param endNotice
      */
     protected void print(boolean endNotice) {
-        try {
-            for (ResultInfoMonitor<Object> monitor : monitors) {
-                monitor.printOut(endNotice);
-            }
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        for (ResultInfoMonitor<Object> monitor : monitors) {
+            monitor.printOut(endNotice);
         }
     }
 
