@@ -121,4 +121,4 @@ batchId=4752, name=子列表(包含动态参数), state=SUCCESS, httpLog=HttpLog
     作为扩展性最强的部分，可利用监听器自定义各种形式的统计输出
 
 ## 执行流程
-![avatar](./src/main/resources/diagram.png)
+![avatar](https://www.processon.com/view/link/5e9c0eb2f346fb4bdd771fd0
