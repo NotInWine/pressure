@@ -47,22 +47,22 @@ public class Main {
         requestInterface.send(
                 new RequestInfo(
                         "列表",
-                        "https://xkx.aiyingli.com/api/video/pay/start?start=1&count=15&keyWord=",
+                        "https://xkx.xxx.com/api/video/pay/start?start=1&count=15&keyWord=",
                         RequestInfo.RequestMethod.GET
                 ),
                 new RequestInfo(
                         "详情(包含动态参数)",
-                        "https://xkx.aiyingli.com/api/video/playDetail?videoId=${data.data.$2.id}&token=",
+                        "https://xkx.xxx.com/api/video/playDetail?videoId=${data.data.$2.id}&token=",
                         RequestInfo.RequestMethod.GET
                 ),
                 new RequestInfo(
                         "子列表(包含动态参数)",
-                        "https://xkx.aiyingli.com/api/video/getVideList?recordId=${data.videoId}&type=video",
+                        "https://xkx.xxx.com/api/video/getVideList?recordId=${data.videoId}&type=video",
                         RequestInfo.RequestMethod.GET
                 ),
                 new RequestInfo(
                         "子列表详情(包含动态参数)",
-                        "https://xkx.aiyingli.com/api/video/playDetail?videoId=${data.$1.id}&token=",
+                        "https://xkx.xxx.com/api/video/playDetail?videoId=${data.$1.id}&token=",
                         RequestInfo.RequestMethod.GET
                 )
         );
