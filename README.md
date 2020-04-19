@@ -14,7 +14,7 @@
 ### 构建
 1. 执行git命令
     ```git
-    
+    git clone https://github.com/NotInWine/pressure.git
     ```
 2. 导入你的idea
 3. 使用 pom.xml 构建项目
