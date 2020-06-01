@@ -38,7 +38,6 @@ import java.io.*;
 import java.net.UnknownHostException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -182,7 +181,7 @@ public class SimpleHttpClient {
      * @throws IOException
      */
     public String postJson(String url, String json, Header... headers) throws ClientProtocolException, IOException {
-        return post(url, json, "json", headers);
+        return post(url, json, "application/json", headers);
     }
 
     /**
@@ -195,15 +194,15 @@ public class SimpleHttpClient {
      * @throws IOException
      */
     public String postXml(String url, String xml, Header... headers) throws ClientProtocolException, IOException {
-        return post(url, xml, "xml", headers);
+        return post(url, xml, "application/xml", headers);
     }
 
-    private String post(String url, String str, String type, Header... headers) throws IOException {
+    public String post(String url, String str, String type, Header... headers) throws IOException {
         HttpPost httppost = new HttpPost(url);
         setHead(httppost, headers);
         StringEntity se = new StringEntity(str, Charset.forName("UTF-8"));
-        se.setContentType("text/" + type);
-        se.setContentEncoding(new BasicHeader(HTTP.CONTENT_TYPE, "application/" + type));
+        se.setContentType(type);
+        se.setContentEncoding(new BasicHeader(HTTP.CONTENT_TYPE, type));
         return getString(httppost, se);
     }
 

@@ -4,9 +4,12 @@ import com.pressure.core.bean.ResultInfo;
 import com.pressure.core.httputil.ResultInfoMonitor;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentSkipListMap;
 
 /**
  * 汇总监控
@@ -45,16 +48,17 @@ public class SummaryMonitor implements ResultInfoMonitor<String> {
     public String out() {
         StringBuilder str = new StringBuilder();
 
+        int secondSize = secondSummary.size();
         if (nameSummary.size() > 0) {
             this.nameSummary.forEach((k, v) -> {
-                str.append(k).append(":").append(v.toString(1)).append("\n");
+                str.append("【").append(k).append("】\n").append(v.toString(secondSize)).append("\n");
             });
         }
 
-        if (secondSummary.size() > 0) {
+        if (secondSize > 0 && nameSummary.size() > 1) {
             Collection<RequestLog> values = secondSummary.values();
             RequestLog log = RequestLog.merge(values.toArray(new RequestLog[0]));
-            str.append("汇总:").append(log.toString(values.size()));
+            str.append("【汇总】\n").append(log.toString(values.size()));
         }
 
         if (str.length() == 0) {
@@ -130,6 +134,11 @@ public class SummaryMonitor implements ResultInfoMonitor<String> {
          */
         private int errorCount;
 
+        /**
+         * 记录响应时长，以及对应的次数
+         */
+        private ConcurrentSkipListMap<Integer, Integer> timeData = new ConcurrentSkipListMap<>();
+
         public RequestLog(long second) {
             this.second = second;
         }
@@ -156,6 +165,16 @@ public class SummaryMonitor implements ResultInfoMonitor<String> {
                 log.timeTotal += rl.timeTotal;
                 log.requestCount += rl.requestCount;
                 log.errorCount += rl.errorCount;
+                rl.timeData.forEach((k, v) -> {
+                    // 合并
+                    Integer integer = log.timeData.get(k);
+                    if (integer == null) {
+                        integer = 0;
+                    }
+                    integer += v;
+
+                    log.timeData.put(k, integer);
+                });
             }
             return log;
         }
@@ -175,8 +194,13 @@ public class SummaryMonitor implements ResultInfoMonitor<String> {
 
             if (!success) {
                 errorCount++;
+            } else {
+                Integer integer = timeData.get(time);
+                if (integer == null) {
+                    integer = 0;
+                }
+                timeData.put(time, integer + 1);
             }
-
             timeTotal += time;
             requestCount++;
         }
@@ -210,18 +234,60 @@ public class SummaryMonitor implements ResultInfoMonitor<String> {
          * @return
          */
         public String toString(int mergeCount) {
-            String s = "{";
+            int successNum = this.requestCount - this.errorCount;
+            String s = "";
             if (mergeCount > 1) {
-                s += "吞吐量(qps)=" + new BigDecimal(requestCount).divide(new BigDecimal(mergeCount),2, BigDecimal.ROUND_HALF_UP).toString();
+                s += "成功吞吐量(qps)=" + new BigDecimal(successNum).divide(new BigDecimal(mergeCount),2, RoundingMode.HALF_DOWN).toString();
+                s += ",总吞吐量(qps)=" + new BigDecimal(requestCount).divide(new BigDecimal(mergeCount),2, RoundingMode.HALF_DOWN).toString();
             }
-            s += ", 最慢响应=" + maxTime +
+
+            Temp[] temps = new Temp[]{
+                    new Temp("90%响应", successNum * 90 / 100),
+                    new Temp("95%响应", successNum * 95/ 100),
+                    new Temp("99%响应", successNum * 99 / 100),
+            };
+
+            int number = 0;
+            Set<Map.Entry<Integer, Integer>> entries = this.timeData.entrySet();
+            for (Map.Entry<Integer, Integer> entry : entries) {
+                number += entry.getValue();
+                for (Temp temp : temps) {
+                    if (temp.value == 0 && number >= temp.number) {
+                        temp.value = entry.getKey();
+                    }
+                }
+            }
+
+            StringBuilder str = new StringBuilder();
+            for (Temp temp : temps) {
+                str.append(", ").append(temp.title).append("=").append(temp.value);
+            }
+
+            s += str.toString() +
+                    ", 最慢响应=" + maxTime +
                     ", 最快响应=" + minTime +
-                    ", 平均响应=" + timeTotal / requestCount +
-                    ", 总请求次数=" + requestCount +
+                    ", 平均响应=" + timeTotal / this.requestCount +
+                    ", 总请求次数=" + this.requestCount +
+                    ", 请求成功次数=" + successNum +
                     ", 请求异常次数=" + errorCount +
-                    ", 异常率=" +  new BigDecimal(errorCount).divide(new BigDecimal(requestCount),4, BigDecimal.ROUND_HALF_UP).toString() +
-                    '}';
+                    ", 异常率=" +  new BigDecimal(errorCount).divide(new BigDecimal(this.requestCount),4, BigDecimal.ROUND_HALF_UP).toString() +
+                    "";
             return s;
+        }
+    }
+
+    /**
+     * 用于计算 n% 响应时间的临时存储结构
+     */
+    private static class Temp {
+
+        final String title;
+        final int number;
+        int value;
+
+        Temp(String title, int number) {
+            this.title = title;
+            this.number = number;
         }
     }
 }

@@ -37,6 +37,10 @@ public class RequestInfo {
      */
     private final String uri;
 
+    private final String body;
+
+    private final String contentType;
+
     private final RequestMethod method;
 
     /**
@@ -66,6 +70,8 @@ public class RequestInfo {
     public RequestInfo(String name, String uri, RequestMethod method, Map<String, String> postParams, LoadConsumer<String, JsonNode> toJson, LoadConsumer<ResultInfo, Map<String, String>> loadParams, Header[] headers) {
         this.name = name;
         this.uri = uri;
+        this.body = null;
+        this.contentType = null;
         this.method = method;
         this.postParams = postParams;
         this.toJson = toJson;
@@ -81,6 +87,20 @@ public class RequestInfo {
         this.toJson = null;
         this.headers = null;
         this.loadParams = null;
+        this.body = null;
+        this.contentType = null;
+    }
+
+    public RequestInfo(String name, String uri, RequestMethod method, Header[] headers, String body, String contentType) {
+        this.name = name;
+        this.uri = uri;
+        this.body = body;
+        this.method = method;
+        this.postParams = null;
+        this.toJson = null;
+        this.headers = headers;
+        this.loadParams = null;
+        this.contentType = contentType;
     }
 
     /**
@@ -127,12 +147,21 @@ public class RequestInfo {
         return loadParams;
     }
 
+    public String getBody() {
+        return body;
+    }
+
+    public String getContentType() {
+        return contentType;
+    }
+
     @Override
     public String toString() {
         return "RequestInfo{" +
                 "name='" + name + '\'' +
                 ", uri='" + uri + '\'' +
                 ", method=" + method +
+                ", body=" + body +
                 ", headers=" + Arrays.toString(headers) +
                 ", postParams=" + postParams +
                 ", toJson=" + toJson +

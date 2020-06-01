@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.net.SocketTimeoutException;
 import java.util.Map;
 import java.util.concurrent.*;
 
@@ -23,7 +24,7 @@ import java.util.concurrent.*;
 public class RequestImpl extends AbstractRequest implements RequestInterface {
 
 
-    private Logger logger = LoggerFactory.getLogger(this.getClass());
+    private final static Logger log = LoggerFactory.getLogger(RequestImpl.class);
 
     /**
      * 线程池并行数
@@ -84,7 +85,7 @@ public class RequestImpl extends AbstractRequest implements RequestInterface {
         }
         close = true;
 
-        System.out.println("BEGIN");
+        log.info("BEGIN");
 
         BlockingQueue<ResultInfo> blockingQueue = new LinkedBlockingQueue<>();
         ThreadPoolExecutor steadyThreadIdiotPool = createTask(infos, blockingQueue);
@@ -147,7 +148,9 @@ public class RequestImpl extends AbstractRequest implements RequestInterface {
                                 finalI,
                                 ResultInfo.State.SUCCESS);
                     } catch (Exception e) {
-                        logger.error("", e);
+                        if (!(e instanceof SocketTimeoutException)) {
+                            this.log.error("请求发送异常", e);
+                        }
                         resultInfo = new ResultInfo(
                                 ri,
                                 log,
@@ -186,7 +189,6 @@ public class RequestImpl extends AbstractRequest implements RequestInterface {
                 jsonNode = Cache.JSON_UTIL.readTree(reStr);
             }
         } catch (IOException e) {
-            logger.error("类型转换异常 {} {}", reStr, ri, e);
             e.printStackTrace();
         }
         return jsonNode;
@@ -212,7 +214,11 @@ public class RequestImpl extends AbstractRequest implements RequestInterface {
                 return new HttpLog(url, null, ri.getHeaders(), sc.getResponseInfo());
             case POST:
                 Map<String, String> postParams = getPostParams(ri, prResult);
-                sc.post(url, postParams, ri.getHeaders());
+                if (ri.getBody() != null) {
+                    sc.post(url, ri.getBody(), ri.getContentType(), ri.getHeaders());
+                } else {
+                    sc.post(url, postParams, ri.getHeaders());
+                }
                 return new HttpLog(ri.getUri(), postParams, ri.getHeaders(), sc.getResponseInfo());
             default:
                 throw new RuntimeException("没有实现的请求方式 " + ri.getMethod());
@@ -220,7 +226,5 @@ public class RequestImpl extends AbstractRequest implements RequestInterface {
     }
 
     public static void main(String[] args) {
-        System.out.println(".".contains("."));
-        System.out.println(".".contains("\\."));
     }
 }

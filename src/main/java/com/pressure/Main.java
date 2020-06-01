@@ -31,7 +31,7 @@ public class Main {
                 .setMonitors(
                         /**
                          * 设置监听（收集统计压测记录）
-                         * 目前自带两个款监听器
+                         * 目前支持两个监听器
                          * @see com.pressure.core.httputil.impl.LogResultInfoMonitor 日志记录
                          * @see com.pressure.core.httputil.impl.SummaryMonitor 汇总打印
                          *
@@ -39,7 +39,7 @@ public class Main {
                          * @see com.pressure.core.httputil.ResultInfoMonitor
                          * 在此处配置给处理器
                          */
-                        new LogResultInfoMonitor(new File("C:\\Users\\yangchao\\Desktop\\test\\log.log")),
+                        new LogResultInfoMonitor(new File("C:\\Users\\73232\\Desktop\\log.txt")),
                         new SummaryMonitor()
                 );
 
@@ -47,11 +47,41 @@ public class Main {
         requestInterface.send(
                 new RequestInfo(
                         "列表",
+                        /**
+                         * 此接口返回数据如下
+                         *  {
+                         *      data: {
+                         *          data: [
+                         *           {
+                         *               id: 521,
+                         *              ...
+                         *           },
+                         *           {
+                         *               id: 522,
+                         *              ...
+                         *           },
+                         *           {
+                         *               id: 520,
+                         *              ...
+                         *           },
+                         *        ]
+                         *  {
+                         */
                         "https://xkx.xxx.com/api/video/pay/start?start=1&count=15&keyWord=",
                         RequestInfo.RequestMethod.GET
                 ),
                 new RequestInfo(
                         "详情(包含动态参数)",
+                        /**
+                         * 由上一个接口获取到 ${data.data.$2.id} = 520
+                         * 接口返回数据如下
+                         * {
+                         *      msg: "请求成功",
+                         *      data: {
+                         *          videoId: "520"
+                         *      }
+                         *  }
+                         */
                         "https://xkx.xxx.com/api/video/playDetail?videoId=${data.data.$2.id}&token=",
                         RequestInfo.RequestMethod.GET
                 ),
