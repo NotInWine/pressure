@@ -7,6 +7,14 @@
     <groupId>pressure</groupId>
     <artifactId>pressure</artifactId>
     <version>1.0-SNAPSHOT</version>
+
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <jackson.version>2.11.0</jackson.version>
+        <skipTests>true</skipTests> <!-- 跳过测试 -->
+    </properties>
+
     <build>
         <plugins>
             <plugin>
@@ -40,9 +48,6 @@
         </plugins>
     </build>
 
-    <properties>
-        <jackson.version>2.11.0</jackson.version>
-    </properties>
 
     <!-- 添加依赖 -->
     <dependencies>
